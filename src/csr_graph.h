@@ -1,5 +1,8 @@
 #include <bits/stdc++.h>
 #include <vector>
+#include <map>
+#include <list>
+#include <queue>
 #include "edge.h"
 #include "node.h"
 #include "graph_algorithms.h"
@@ -101,7 +104,104 @@ class CSR_graph{
         vector<int>& getEdges(){
             return edges;
         }
+
+        void print_edges(int airport_selection){
+            int startPos = nodes.at(airport_selection);
+            int endPos = 0;
+            if(airport_selection == nodes.size()){
+                endPos = edges.size()+1;
+            }
+            else{
+            endPos = nodes.at(airport_selection+1);
+            }
+
+            cout << "Printing results for aiport with id " << airport_selection << ": " << endl;
+
+            for(int i = startPos; i < endPos; i++){
+                cout << edges.at(i) << endl;
+            }
+        }
+
+        void getEdgeBounds(int airport_selection, int& s, int& e){
+            int startPos = nodes.at(airport_selection);
+            int endPos = 0;
+            if(airport_selection == nodes.size()){
+                endPos = edges.size()+1;
+            }
+            else{
+            endPos = nodes.at(airport_selection+1);
+            }
+
+            s = startPos;
+            e = endPos;
+        }
+
         //TODO: BFS and DFS starting at a given airport
+
+        bool CSR_DFS(int start, int destination){
+            vector<bool> visited(3600, false);
+            bool ret = false;
+
+            DFS_helper(start, destination, visited, ret);
+            return ret;
+        }
+
+        void DFS_helper(int curr, int destination, vector<bool>& visited, bool& found){
+            visited.at(curr) = true;
+
+            if(curr == destination){
+                found = true;
+                cout << "found" << endl;
+                return;
+            }
+            
+            int startPos;
+            int endPos;
+
+            getEdgeBounds(curr, startPos, endPos);
+            for(int i = startPos; i < endPos; i++){
+                int curr_edge = edges.at(i);
+                if(visited.at(curr_edge) != true){
+                    return DFS_helper(curr_edge, destination, visited, found);
+                }
+            }
+        }
+
+        bool CSR_BFS(int start, int destination){
+            bool ret = false;
+            BFS_helper(start, destination, ret);
+            return ret;
+        }
+
+        void BFS_helper(int start, int destination, bool& found){
+            vector<bool> visited(3600, false);
+            visited.at(start) = true;
+
+            queue<int> q;
+            q.push(start);
+
+            while(!q.empty()){
+                int curr = q.front();
+                q.pop();
+
+                if(curr == destination){
+                    found = true;
+                    return;
+                }
+
+                int startPos;
+                int endPos;
+
+                getEdgeBounds(curr, startPos, endPos);
+                for(int i = startPos; i < endPos; i++){
+                    int curr_edge = edges.at(i);
+                    if(visited.at(curr_edge) != true){
+                        visited.at(curr_edge) = true;
+                        q.push(curr_edge);
+                    }
+                }
+            }
+        }
 
         //TODO: shortest path between two airports
 
